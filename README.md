@@ -92,14 +92,16 @@ View Dockerfiles:
   - 8.0 (available for alpha testing)
       - [`8.0-fpm-develop`](https://github.com/markshust/docker-magento/tree/master/images/php/8.0)
   - 7.4
-      - [`7.4-fpm`, `7.4-fpm-5`](https://github.com/markshust/docker-magento/tree/master/images/php/7.4)
+      - [`7.4-fpm`, `7.4-fpm-6`](https://github.com/markshust/docker-magento/tree/master/images/php/7.4)
+      - [`7.4-fpm-5`](https://github.com/markshust/docker-magento/tree/37.0.2/images/php/7.4)
       - [`7.4-fpm-4`](https://github.com/markshust/docker-magento/tree/36.0.2/images/php/7.4)
       - [`7.4-fpm-3`](https://github.com/markshust/docker-magento/tree/36.0.1/images/php/7.4)
       - [`7.4-fpm-2`](https://github.com/markshust/docker-magento/tree/34.2.0/images/php/7.4)
       - [`7.4-fpm-1`](https://github.com/markshust/docker-magento/tree/34.1.0/images/php/7.4)
       - [`7.4-fpm-0`](https://github.com/markshust/docker-magento/tree/33.0.0/images/php/7.4)
   - 7.3
-      - [`7.3-fpm`, `7.3-fpm-12`](https://github.com/markshust/docker-magento/tree/master/images/php/7.3)
+      - [`7.3-fpm`, `7.3-fpm-13`](https://github.com/markshust/docker-magento/tree/master/images/php/7.3)
+      - [`7.3-fpm-12`](https://github.com/markshust/docker-magento/tree/37.0.2/images/php/7.3)
       - [`7.3-fpm-11`](https://github.com/markshust/docker-magento/tree/36.0.2/images/php/7.3)
       - [`7.3-fpm-10`](https://github.com/markshust/docker-magento/tree/36.0.1/images/php/7.3)
       - [`7.3-fpm-9`](https://github.com/markshust/docker-magento/tree/34.2.0/images/php/7.3)
@@ -386,7 +388,11 @@ Otherwise, this project now automatically sets up Xdebug support with VS Code. I
 
 Running Docker on Linux should be pretty straight-forward. Note that you need to run some [post install commands](https://docs.docker.com/install/linux/linux-postinstall/) as well as [installing Docker Compose](https://docs.docker.com/compose/install/). These steps are taken care of automatically with Docker Desktop, but not on Linux.
 
-Be sure to see the "Linux only" documentation in the [docker-compose.dev.yml](https://github.com/markshust/docker-magento/blob/master/compose/docker-compose.dev.yml#L30) file. The `extra_hosts` param is required to be defined on Linux for proper DNS resolution.
+The `host.docker.internal` hostname is [hard-coded in the php.ini file](https://github.com/markshust/docker-magento/blob/master/images/php/7.4/conf/php.ini#L8), but this hostname does not exist on Linux. To make this hostname resolve, uncomment the `extra_hosts` param in the `docker-compose.dev.yml` file, and replace `IP` with result of:
+
+```
+docker run --rm alpine ip route | awk 'NR==1 {print $3}'
+```
 
 You may also have to increase a virtual memory map count on the host system. It is required by [Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html).
 
@@ -396,7 +402,7 @@ Add following line to `/etc/sysctl.conf`:
 vm.max_map_count=262144
 ```
 
-To enable Xdebug on linux, you'll also need to open port 9001 on the firewall with:
+To enable Xdebug on Linux, you'll also need to open port 9001 on the firewall by running:
 
 ```
 sudo iptables -A INPUT -p tcp --dport 9001 -j ACCEPT
